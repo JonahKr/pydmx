@@ -49,7 +49,7 @@ def Fill_RGB_random(dev1,dev2,dev3):
     print(Uni)
 
 def Push():
-    
+    pass
 
 #print(Uni)
 All_Fill_RGB(256,2,3)
