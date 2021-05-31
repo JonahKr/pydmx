@@ -88,8 +88,8 @@ class FTDI(Device, DMXController):
             Device.__init__(self, mode="b", device_index=device_index)
         except LibraryMissingError:
             raise Exception("Dependency libftdi not found. Check the README for driver dependencies.")
-        self.baudrate = 250000
-        self.ftdi_fn.ftdi_set_line_property(DMXController._BITS_8, FTDI._STOP_BITS_2, FTDI._PARITY_NONE)
+        self.baudrate = DMXController._BAUD_RATE
+        self.ftdi_fn.ftdi_set_line_property(DMXController._BIT_ENCODING, DMXController._STOP_BIT_LENGTH, DMXController._PARITY_BIT_LENGTH)
 
     def write(self, data: List[int]):
         """Write 512 bytes or less of DMX data."""
@@ -109,10 +109,10 @@ class FTDI(Device, DMXController):
         wait_ms(15)
 
     def _set_break_on(self):
-        self.ftdi_fn.ftdi_set_line_property2(FTDI._BITS_8, FTDI._STOP_BITS_2, FTDI._PARITY_NONE, FTDI._BREAK_ON)
+        self.ftdi_fn.ftdi_set_line_property2(DMXController._BIT_ENCODING, DMXController._STOP_BIT_LENGTH, DMXController._PARITY_BIT_LENGTH, FTDI._BREAK_ON)
 
     def _set_break_off(self):
-        self.ftdi_fn.ftdi_set_line_property2(FTDI._BITS_8, FTDI._STOP_BITS_2, FTDI._PARITY_NONE,
+        self.ftdi_fn.ftdi_set_line_property2(DMXController._BIT_ENCODING, DMXController._STOP_BIT_LENGTH, DMXController._PARITY_BIT_LENGTH,
                                              FTDI._BREAK_OFF)
 
     @staticmethod
