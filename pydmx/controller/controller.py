@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 
-import numpy as np
+from typing import List
+
 
 class DMXController(ABC):
-  """
+    """
   DMX Controller Base Class
   """
 
-  """
+    """
   Source: DMX512 Protocol Implementation Using MC9S08GT60 8-Bit MCU By NXP
     https://web.archive.org/web/20170830235842/http://cache.freescale.com/files/microcontrollers/doc/app_note/AN3315.pdf
   
@@ -20,25 +21,24 @@ class DMXController(ABC):
 
 
   """
-  _BAUD_RATE = 250000
-  _BIT_ENCODING = 8
-  _START_BIT_LENGTH = 1
-  _STOP_BIT_LENGTH = 2
-  _PARITY_BIT_LENGTH = 0
+    _BAUD_RATE = 250000
+    _BIT_ENCODING = 8
+    _START_BIT_LENGTH = 1
+    _STOP_BIT_LENGTH = 2
+    _PARITY_BIT_LENGTH = 0
 
-
-  @abstractmethod
-  def __init__(self, *args, **kwargs):
-    """
+    @abstractmethod
+    def __init__(self, *args, **kwargs):
+        """
     Initialising the DMX Controller
     """
-  
-  @abstractmethod
-  def write(self, dmxdata: np.ndarray):
-    """
+
+    @abstractmethod
+    def write(self, dmxdata: List[int]):
+        """
     Writing 512 Bytes of DMX Data
     """
-  
-  @staticmethod
-  def get_controller_name():
-    return "ABC"
+
+    @staticmethod
+    def get_controller_name():
+        return "ABC"
