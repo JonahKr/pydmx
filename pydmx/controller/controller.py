@@ -1,6 +1,20 @@
 from abc import ABC, abstractmethod
+from enum import Enum
+from platform import system
+from threading import Thread
+from time import sleep
 
-from typing import List
+
+class OS(Enum):
+    LINUX = 1
+    WINDOWS = 2
+
+
+global operatingsystem
+if system() == "Linux":
+    operatingsystem = OS.LINUX
+elif system() == "Windows":
+    operatingsystem = OS.WINDOWS
 
 
 class DMXController(ABC):
@@ -21,24 +35,43 @@ class DMXController(ABC):
 
 
   """
-    _BAUD_RATE = 250000
-    _BIT_ENCODING = 8
-    _START_BIT_LENGTH = 1
-    _STOP_BIT_LENGTH = 2
-    _PARITY_BIT_LENGTH = 0
 
     @abstractmethod
     def __init__(self, *args, **kwargs):
-        """
-    Initialising the DMX Controller
-    """
+        """Initialising the DMX Controller"""
+        self._dmxdata: bytes = bytes((0,) * 512)
+        self.active = False
+        self._writer_delay = 0.3
+        self.thread = Thread(target=self.writer_thread, daemon=True)
+
+    @property
+    def dmxdata(self):
+        """"""
+        return self._dmxdata
+
+    @dmxdata.setter
+    def dmxdata(self, value: bytes):
+        self._dmxdata = value
 
     @abstractmethod
-    def write(self, dmxdata: List[int]):
-        """
-    Writing 512 Bytes of DMX Data
-    """
+    def write(self):
+        """Writing 512 Bytes of DMX Data"""
+        raise NotImplementedError("Must override write Method!")
+
+    def activate(self):
+        self.active = True
+
+    def deactivate(self):
+        self.active = False
+
+    def writer_thread(self):
+        while True:
+            if not self.active:
+                continue
+            self.write()
+            # The Sleep intervall has to be a max 0.3
+            sleep(self._writer_delay)
 
     @staticmethod
     def get_controller_name():
-        return "ABC"
+        return "DMX Controller Base Class"
