@@ -1,5 +1,6 @@
 from platform import system
 from time import sleep
+
 from serial import STOPBITS_TWO, Serial
 
 from pydmx.controller.controller import OS, DMXController, operatingsystem
@@ -32,7 +33,7 @@ class SerialController(DMXController):
             fcntl.ioctl(self.desc, 0x5428)
         else:
             self.serial.send_break(0.0001)
-        self.serial.write(b'\x00')
+        self.serial.write(b"\x00")
         self.serial.write(self._dmxdata)
         self.serial.flush()
 
