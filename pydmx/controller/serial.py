@@ -36,7 +36,3 @@ class SerialController(DMXController):
         self.serial.write(b"\x00")
         self.serial.write(self._dmxdata)
         self.serial.flush()
-
-    @staticmethod
-    def get_controller_name() -> str:
-        return "SerialController"

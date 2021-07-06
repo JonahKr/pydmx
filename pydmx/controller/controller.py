@@ -71,7 +71,3 @@ class DMXController(ABC):
             self.write()
             # The Sleep intervall has to be a max 0.3
             sleep(self._writer_delay)
-
-    @staticmethod
-    def get_controller_name():
-        return "DMX Controller Base Class"
