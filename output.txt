@@ -1,0 +1,56 @@
+FixtureSchema(
+    name='TestFIXTURE',
+    shortName=None,
+    categories=[
+        <FixtureCategories.COLORCHANGER: 'Color Changer'>,
+        <FixtureCategories.STROBE: 'Strobe'>
+    ],
+    meta=MetaSchema(
+        authors=['Jonah'],
+        createDate='2420-04-20',
+        lastModifyDate='6969-06-09',
+        importPlugin=None
+    ),
+    comment=None,
+    links=None,
+    helpWanted=None,
+    rdm=None,
+    physical=None,
+    matrix=None,
+    wheels=None,
+    availableChannels={
+        'Red': ChannelSchema(
+            name=None,
+            fineChannelAliases=None,
+            dmxValueResolution=None,
+            defaultValue=None,
+            highlightValue=None,
+            constant=None,
+            precedence=None,
+            capability=ColorIntensity(
+                brightness=None,
+                brightnessStart=None,
+                brightnessEnd=None,
+                dmxRange=None,
+                type=<CapabilityType.COLORINTENSITY: 'ColorIntensity'>,
+                comment=None, helpWanted=None, menuclick=None, switchChannels=None,
+                color=<Color.RED: 'Red'>
+            ),
+            capabilities=None
+        ),
+        'Strobe': ChannelSchema(
+            name=None, fineChannelAliases=None, dmxValueResolution=None, defaultValue=None, highlightValue=None, constant=None, precedence=None,
+            capability=ShutterStrobe(
+                duration=None, durationStart=None, durationEnd=None,
+                speed='30Hz', speedStart=None, speedEnd=None, dmxRange=None,
+                type=<CapabilityType.SHUTTERSTROBE: 'ShutterStrobe'>,
+                comment=None, helpWanted=None, menuclick=None, switchChannels=None,
+                shutterEffect=<ShutterEffect.STROBE: 'Strobe'>, soundControlled=None, randomTiming=None
+            ),
+            capabilities=None
+        ),
+        'Tilt': ChannelSchema(
+            name=None, fineChannelAliases=None, dmxValueResolution=None, defaultValue=None, highlightValue=None, constant=None, precedence=None,
+            capability=ColorPreset(
+                colorTemperature=None, colorTemperatureStart=None, colorTemperatureEnd=None, dmxRange=None,
+                type=<CapabilityType.TILT: 'Tilt'>, comment=None, helpWanted=None, menuclick=None, switchChannels=None, colors=None, colorsStart=None, colorsEnd=None), capabilities=None)}, templateChannels=None, modes=[ModesSchema(name='1', shortName=None, rdmPersonalityIndex=None, physical=None, channels=['Red', 'Tilt', 'Strobe'])])

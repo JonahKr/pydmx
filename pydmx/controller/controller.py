@@ -19,8 +19,8 @@ elif system() == "Windows":
 
 class DMXController(ABC):
     """
-  DMX Controller Base Class
-  """
+    DMX Controller Base Class
+    """
 
     """
   Source: DMX512 Protocol Implementation Using MC9S08GT60 8-Bit MCU By NXP

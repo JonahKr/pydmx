@@ -1,14 +1,21 @@
-# TODO rethink the Logic of using different Base Classes for the different Capabilities
-
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union, NewType
 
-from pydmx.openfixturelibrary.definitionsSchema import MinMax, Color
+from pydmx.openfixturelibrary.definitionsSchema import (
+    Angle,
+    Brightness,
+    Color,
+    ColorTemperatureType,
+    Duration,
+    MinMax,
+    Speed,
+)
 
 
 class CapabilityType(Enum):
     """Enum: All possible channel capabilities"""
+
     NOFUNCTION = "NoFunction"
     SHUTTERSTROBE = "ShutterStrobe"
     STROBESPEED = "StrobeSpeed"
@@ -53,8 +60,10 @@ class CapabilityType(Enum):
     MAINTENANCE = "Maintenance"
     GENERIC = "Generic"
 
+
 class MenuClick(Enum):
     """Enum: different menu clicks"""
+
     START = "start"
     CENTER = "center"
     END = "end"
@@ -64,53 +73,141 @@ class MenuClick(Enum):
 @dataclass
 class CapabilitySchema:
     """Parent Schema for all Capabilities"""
+
     # Range of DMX values e.g. 0 to 255 (in most cases) the capability can be applied at
     dmxRange: Optional[MinMax]
     # Capability from the list above
-    type: CapabilityType
+    type: str
     # Comment with further descriptions
     comment: Optional[str]
     # If the fixture entry needs some love
     helpWanted: Optional[str]
-    # 
+    #
     menuclick: Optional[MenuClick]
     # A switching channel is a channel whose functionality depends on the value of another channel in the same mode.
     switchChannels: Optional[Dict[str, str]]
 
+
+#
+# NoFunction
+#
 @dataclass
-class ColorIntensity(CapabilitySchema):
-    type = CapabilityType.COLORINTENSITY
-    #
-    color: Color
-    # Brightness either in Lumens or Percent
-    brightness: Optional[str]
-    brightnessStart: Optional[str]
-    brightnessEnd: Optional[str]
+class NoFunction(CapabilitySchema):
+    type: CapabilityType.NOFUNCTION
+
+
+#
+# ShutterStrobe
+#
+class ShutterEffect(Enum):
+    """Enum: All predefined shutter strobe effects"""
+
+    OPEN = "Open"
+    CLOSED = "Closed"
+    STROBE = "Strobe"
+    PULSE = "Pulse"
+    RAMPUP = "RampUp"
+    RAMPDOWN = "RampDown"
+    RAMPUPDOWN = "RampUpDown"
+    LIGHTNING = "Lightning"
+    SPIKES = "Spikes"
 
 
 @dataclass
-class ShutterStrobe(CapabilitySchema):
-    _type = CapabilityType.SHUTTERSTROBE
+class ShutterStrobe(CapabilitySchema, Speed, Duration):
+    type = CapabilityType.SHUTTERSTROBE.value
     shutterEffect: ShutterEffect
+    # Sound COntroll Toggle
     soundControlled: Optional[bool]
-    # Speed in hertz, beatsPerMinute, percent, "enum": ["fast", "slow", "stop", "slow reverse", "fast reverse"]
-    speed: Optional[str]
-    speedStart: Optional[str]
-    speedEnd: Optional[str]
-    # Duration in seconds, milliseconds,percent, "enum": ["instant", "short", "long"]
-    duration: Optional[str]
-    durationStart: Optional[str]
-    durationEnd: Optional[str]
     randomTiming: Optional[bool]
 
 
-class ShutterEffect(Enum):
-    OPEN = ""
-    CLOSED = ""
-    STROBE = ""
-    PULSE = ""
-    RAMPUP = ""
-    RAMPDOWN = ""
-    RAMPUPDOWN = ""
-    LIGHTNING = ""
-    SPIKES = ""
+#
+# StrobeSpeed
+#
+@dataclass
+class StrobeSpeed(CapabilitySchema, Speed):
+    type = "StrobeSpeed"
+
+
+#
+# StrobeDuration
+#
+@dataclass
+class StrobeDuration(CapabilitySchema, Duration):
+    type = CapabilityType.STROBEDURATION.value
+
+
+#
+# Intensity
+#
+@dataclass
+class Intensity(CapabilitySchema, Brightness):
+    type = CapabilityType.INTENSITY.value
+
+
+#
+# ColorIntensity
+#
+@dataclass
+class ColorIntensity(CapabilitySchema, Brightness):
+    type = CapabilityType.COLORINTENSITY.value
+    color: Color
+
+
+#
+# ColorPreset
+#
+@dataclass
+class ColorPreset(CapabilitySchema, ColorTemperatureType):
+    type = CapabilityType.COLORTEMPERATURE.value
+    colors: Optional[List[str]]
+    colorsStart: Optional[List[str]]
+    colorsEnd: Optional[List[str]]
+
+
+#
+# ColorTemperature
+#
+@dataclass
+class ColorTemperature(CapabilitySchema, ColorTemperatureType):
+    type = CapabilityType.COLORTEMPERATURE.value
+
+
+#
+# Pan
+#
+@dataclass
+class Pan(CapabilitySchema, Angle):
+    type = CapabilityType.PAN.value
+
+
+#
+# PanContinuous
+#
+@dataclass
+class PanContinuous(CapabilitySchema, Speed):
+    type = CapabilityType.PANCONTINUOUS.value
+
+
+#
+# Tilt
+#
+@dataclass
+class Tilt(CapabilitySchema, Angle):
+    type = "Tilt"
+
+
+Capabilities = Union[
+    NoFunction,
+    ShutterStrobe,
+    StrobeSpeed,
+    StrobeDuration,
+    Intensity,
+    ColorIntensity,
+    ColorPreset,
+    ColorTemperature,
+    Pan,
+    PanContinuous,
+    Tilt,
+]

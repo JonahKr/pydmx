@@ -12,8 +12,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from pydmx.openfixturelibrary.definitionsSchema import Dimensions, MinMax
 from pydmx.openfixturelibrary.channelSchema import ChannelSchema
+from pydmx.openfixturelibrary.definitionsSchema import Dimensions, MinMax
+
 
 class FixtureCategories(Enum):
     """Enum: All possible Categories for fixtures."""
@@ -173,10 +174,10 @@ class ChannelOrder(Enum):
 class MatrixChannels:
     """Custom channel setting extensions for matrix fixtures"""
 
-    insert: str = "matrixChannels"
     repeatFor: Union[RepeatFor, List[str]]
     channelOrder: ChannelOrder
     templateChannels: List[Union[None, str]]
+    insert: str = "matrixChannels"
 
 
 @dataclass

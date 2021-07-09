@@ -1,25 +1,31 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
-from pydmx.openfixturelibrary.capabilitySchema import CapabilitySchema
+from pydmx.openfixturelibrary.capabilitySchema import Capabilities
+
 
 class DmxResolution(Enum):
     """Enum: The DMX bit resolution options."""
+
     EIGHTBIT = "8bit"
     SIXTEENBIT = "16bit"
     TWENTYFOURBIT = "24bit"
 
+
 class Precedence(Enum):
     """Enum: Precedence specifies to which value the channel should be set if there are two conflicting active cues containing this channel"""
+
     # Latest takes presendece
     LTP = "LTP"
     # Highest takes Presedence
     HTP = "HTP"
 
+
 @dataclass
 class ChannelSchema:
     """Definition of a specific Channel of a fixture"""
+
     # Channel name
     name: Optional[str]
     # fineChannelAliases
@@ -36,6 +42,6 @@ class ChannelSchema:
     # HTP (Highest takes precedence) or LTP (Latest (change) takes precedence).
     precedence: Optional[Precedence]
     # The Capability of this Channel
-    capability: Optional[CapabilitySchema]
+    capability: Optional[Capabilities]
     # Capabilities of the Channel if multiple are defined
-    capabilities: Optional[List[CapabilitySchema]]
+    capabilities: Optional[List[Capabilities]]

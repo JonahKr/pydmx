@@ -1,0 +1,41 @@
+{
+    "$schema": "https://raw.githubusercontent.com/OpenLightingProject/open-fixture-library/master/schemas/fixture.json",
+    "name": "TestFIXTURE",
+    "meta": {
+        "authors": ["Jonah"],
+        "createDate": "2420-04-20",
+        "lastModifyDate": "6969-06-09"
+    },
+    "categories": ["Color Changer","Strobe"],
+    "availableChannels": {
+        "Red":{
+            "capability": {
+                "type":"ColorIntensity",
+                "color": "Red"
+            }
+        },
+        "Strobe":{
+            "capability": {
+                "type": "ShutterStrobe",
+                "shutterEffect": "Strobe",
+                "speed":"30Hz"
+            }
+        },
+        "Tilt":{
+            "capability":{
+                "type": "Tilt",
+                "angle": "30deg"
+            }
+        }
+    },
+    "modes":[
+        {
+            "name": "1",
+            "channels": [
+                "Red",
+                "Tilt",
+                "Strobe"
+            ]
+        }
+    ]
+}

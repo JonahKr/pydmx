@@ -1,39 +1,28 @@
 import json
+from abc import ABC
 from dataclasses import dataclass
-from dacite import Config, from_dict
 from enum import Enum
+from typing import Collection, ForwardRef, Type, Union
 
-json1 = "{}"
+from dacite import Config, from_dict
 
-class Category(Enum):
-  HUMAN = "human"
-  ANIMAL = "animal"
-  ALIEN = "alien"
+from pydmx.openfixturelibrary.fixtureSchema import FixtureSchema
+from pydmx.openfixturelibrary.capabilitySchema import CapabilitySchema, ColorIntensity, ShutterStrobe, Tilt
 
-@dataclass
-class Alive:
-  type: Category
-  name: str
-  height: int
+data = json.load(open("./test.json"))
 
-@dataclass
-class Human(Alive):
-  type = Category.HUMAN
-  age: int
-  surname: str
+test_fixture = from_dict(
+    data_class=FixtureSchema,
+    data=data,
+    config=Config(
+      cast=[Enum], 
+      forward_references={
+        "ShutterStrobe": ShutterStrobe,
+        "Tilt": Tilt,
+        "ColorIntensity": ColorIntensity
+      }
+    ),
+)
+print(test_fixture)
 
-@dataclass
-class Animal(Alive):
-  type = Category.ANIMAL
-  species: str
-
-@dataclass
-class Alien(Alive):
-  type = Category.ALIEN
-  planet:str
-
-
-#ex_alive = '''{"type":"alien", "name":"qlack", "height": 58, "planet":"Mars"}'''
-ex_human = '''{"type":"human", "name":"qlack", "height": 58, "planet":"Mars"}'''
-ex_animal = '''{"type":"animal", "name":"qlack", "height": 58, "planet":"Mars"}'''
-ex_alien = '''{"type":"alien", "name":"qlack", "height": 58, "planet":"Mars"}'''
+print([cls.__name__ for cls in CapabilitySchema.__subclasses__()])
