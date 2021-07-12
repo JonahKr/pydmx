@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Union, NewType
+from typing import Dict, List, NewType, Optional, Union
 
 from pydmx.openfixturelibrary.definitionsSchema import (
     Angle,

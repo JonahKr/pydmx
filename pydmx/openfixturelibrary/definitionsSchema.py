@@ -2,8 +2,9 @@
 Standard non purpose related schemas.
 """
 from dataclasses import dataclass
-from typing import NamedTuple, Optional
 from enum import Enum
+from typing import NamedTuple, Optional
+
 
 @dataclass
 class Angle:
