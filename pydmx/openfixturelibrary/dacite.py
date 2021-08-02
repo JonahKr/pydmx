@@ -72,6 +72,7 @@ def from_dict(data_class: Type[U], data: Data, config: Optional[Config] = None) 
     for field in data_class_fields:
         field = copy.copy(field)
         field.type = data_class_hints[field.name]
+        #print(f"Field Type: {field.type}")
         try:
             try:
                 field_data = data[field.name]
@@ -101,6 +102,7 @@ def from_dict(data_class: Type[U], data: Data, config: Optional[Config] = None) 
         if field.init:
             init_values[field.name] = value
         else:
+            print("NO INIT")
             post_init_values[field.name] = value
 
     return create_instance(
@@ -223,12 +225,12 @@ def transform_value(
     target_type: Type,
     value: Any,
 ) -> Any:
-    # print(f'Targettype: {target_type}')
-    # print(f'Value: {value}')
+    print(f'Creating: {target_type}')
     if target_type in type_hooks:
         value = type_hooks[target_type](value)
     else:
         for cast_type in cast:
+            print(f'Cast: {cast_type} {target_type}')
             if is_subclass(target_type, cast_type):
                 if is_generic_collection(target_type):
                     value = extract_origin_collection(target_type)(value)
@@ -239,6 +241,7 @@ def transform_value(
         if value is None:
             return None
         target_type = extract_optional(target_type)
+        print("RECURSIVE TRANS")
         return transform_value(type_hooks, cast, target_type, value)
     if is_generic_collection(target_type) and isinstance(
         value, extract_origin_collection(target_type)
@@ -266,7 +269,6 @@ def extract_origin_collection(collection: Type) -> Type:
     try:
         return collection.__extra__
     except AttributeError:
-        print("Attribute Error")
         return collection.__origin__
 
 
@@ -323,19 +325,25 @@ def is_instance(value: Any, type_: Type) -> bool:
     elif is_union(type_):
         return any(is_instance(value, t) for t in extract_generic(type_))
     elif is_generic_collection(type_):
+        #print(f"Generic COllection of type: {type_} and value {value}")
         origin = extract_origin_collection(type_)
         if not isinstance(value, origin):
+            #print("F1")
             return False
         if not extract_generic(type_):
             return True
         if isinstance(value, tuple):
+            #print("TUPLE!")
             tuple_types = extract_generic(type_)
             if len(tuple_types) == 1 and tuple_types[0] == ():
+                #print("Special Tuple")
                 return len(value) == 0
             elif len(tuple_types) == 2 and tuple_types[1] is ...:
+                #print("TUPLE")
                 return all(is_instance(item, tuple_types[0]) for item in value)
             else:
                 if len(tuple_types) != len(value):
+                    #print("F2")
                     return False
                 return all(
                     is_instance(item, item_type)
@@ -345,6 +353,7 @@ def is_instance(value: Any, type_: Type) -> bool:
             key_type, val_type = extract_generic(type_, defaults=(Any, Any))
             for key, val in value.items():
                 if not is_instance(key, key_type) or not is_instance(val, val_type):
+                    #print("F3")
                     return False
             return True
         return all(
@@ -366,6 +375,7 @@ def is_instance(value: Any, type_: Type) -> bool:
                 return True
             return isinstance(value, type_)
         except TypeError:
+            #print("F4")
             return False
 
 
@@ -382,7 +392,7 @@ def is_generic_collection(type_: Type) -> bool:
 def extract_generic(type_: Type, defaults: Tuple = ()) -> tuple:
     try:
         if hasattr(type_, "_special") and type_._special:
-            print("GENERICA EXTRACTA")
+            #print("GENERICA EXTRACTA")
             return defaults
         return type_.__args__ or defaults  # type: ignore
     except AttributeError:
@@ -391,7 +401,9 @@ def extract_generic(type_: Type, defaults: Tuple = ()) -> tuple:
 
 def is_subclass(sub_type: Type, base_type: Type) -> bool:
     if is_generic_collection(sub_type):
+        print("GENERIC SUB")
         sub_type = extract_origin_collection(sub_type)
+        print(sub_type)
     try:
         return issubclass(sub_type, base_type)
     except TypeError:

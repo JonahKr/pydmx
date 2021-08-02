@@ -17,7 +17,11 @@ from pydmx.openfixturelibrary.fixtureSchema import FixtureSchema
 data = json.load(open("./test.json"))
 
 test_fixture = from_dict(
-    data_class=FixtureSchema, data=data, config=Config(cast=[Enum],),
+    data_class=FixtureSchema,
+    data=data,
+    config=Config(
+        cast=[Enum],
+    ),
 )
 print(test_fixture)
 

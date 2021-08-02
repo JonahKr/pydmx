@@ -16,9 +16,9 @@ class Angle:
     swingAngle: ["closed", "narrow", "wide"]
     """
 
-    angle: str
-    angleStart: str
-    angleEnd: str
+    angle: Optional[str]
+    angleStart: Optional[str]
+    angleEnd: Optional[str]
 
 
 @dataclass
