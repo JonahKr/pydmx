@@ -3,32 +3,33 @@ This Module is for converting dictionaries into the according data-classes.
 This will add some unnecessary overhead in initialization and code complexity 
 but will prevent errors later on due to type hinting and tracable logic.
 
-The underlying Logic is somewhat based on the python module "dacite".
+The underlying Logic is somewhat based on the python module "dacite" (MIT-License).
 You can find more about dacite here: https://github.com/konradhalas/dacite
 """
 
-from dataclasses import MISSING, field, is_dataclass, _FIELDS, _FIELD, _FIELD_INITVAR, Field
+from copy import copy
+from dataclasses import (
+    _FIELD,
+    _FIELD_INITVAR,
+    _FIELDS,
+    MISSING,
+    is_dataclass,
+)
+from enum import Enum
 from typing import (
     Any,
+    Collection,
     Dict,
-    Mapping,
+    Optional,
     Type,
     TypeVar,
-    get_type_hints,
-    List,
-    Tuple,
-    Optional,
     Union,
-    Collection
+    get_type_hints,
 )
-from copy import copy
-from enum import Enum
 
-#To prevent confusion with the Naming, the type which should be converted to is called Schema
+# To prevent confusion with the Naming, the type which should be converted to is called Schema
 Schema = TypeVar("Schema")
 
-class typedSubclass:
-    pass
 
 def create_from_dict(schema: Type[Schema], data: Dict[str, Any]) -> Schema:
     """Creating a dataclass object based on a schema and a dictionary with Enum conversion.
@@ -56,165 +57,101 @@ def create_from_dict(schema: Type[Schema], data: Dict[str, Any]) -> Schema:
         # Creating a shallow copy of the current field
         field = copy(field)
         field.type = data_class_hints[field.name]
-        #Now we try to create the field
-        #try:
-        value = create_field(field, data[field.name])
-        print(value)
-        init_values[field.name] = value
-        #except:
-            #TODO: proper Exception Handling
-            #pass
-    # Creating and returning the object schema instance from the value dictionary
-    #instance = schema(**init_values)
-    #return instance
+        # Now we try to create the field
+        try:
+            value = create_type_value(field.type, data[field.name])
+        except NoMatchingTypeError:
+            print("The value doesn't fit the required type!")
+        # A Keyerror will occur if data has no field.name key aka is undefined
+        except KeyError:
+            value = None
 
-def create_field(field: Field, value: Any) -> Any:
-    """"""
-    target_type = field.type
+        # In the case that the Schema already has a preset value for the field,
+        # We check if the created value equals the set value and raise incase not.
+        if field.default != MISSING and value != field.default:
+            raise NoMatchingTypeError(field.type, value)
+        # print(value)
+        init_values[field.name] = value
+
+    # Creating and returning the object schema instance from the value dictionary
+    instance = schema(**init_values)
+    return instance
+
+
+def create_type_value(target_type: Type, value: Any) -> Any:
+    """This Creates the value to a sepcific type.
+
+    Args:
+        target_type (Type): The type to try create the value from
+        value (Any): The value to be transformed / type approved
+
+    Raises:
+        NoMatchingTypeError: If no type fits to the value
+
+    Returns:
+        Any: the value to the specific type
+    """
     target_origin = None
     if hasattr(target_type, "__origin__"):
         target_origin = target_type.__origin__
-    print(f'Creating: {target_type} {target_origin}')
-    #First of all we might need to adjust the value e.g. if its an Enum
-    # If the Type if Optional, we need to unpack the type
-    if target_origin == Union and type(None) in target_type.__args__:
-        print("OPT")
-        if value == None:
+    target_args = ()
+    if hasattr(target_type, "__args__"):
+        target_args = target_type.__args__
+
+    # Type Any means anything can be right
+    if target_type == Any:
+        return value
+    # If its a Union we need to unpack the types
+    elif target_origin == Union:
+        # Optional is a specific subtype of a Union including None
+        if type(None) in target_args and value == None:
             return None
-        else:
-            for type_ in target_type.__args__:
-                if type_ != None:
-                    field.type = type_
-                    return create_field(field, value)
-
-    # If its a value, we cast the value to the Enum value
-    
-    if issubclass(target_type, Enum):
-        value = target_type(value)
-    # List, Dict ...and issubclass(target_origin, Collection) and isinstance(value, target_origin)
-    if target_origin != None :
-        print("GENERIC")
-        collection_cls = value.__class__
-        
-    return value
-    #TODO: Typed Subclass
-
-
-def extract_value(target_type: Type, value: Any) -> Any:
-    """
-    """
-    print(f"Targettype: {target_type}")
-    print(f"Value: {value}")
-    # If the target type is an Enum we need to convert the value: "Ant" -> < Animal.ANT "Ant">
-    try:
-        if issubclass(target_type, Enum):
-            # We can extract the according Enum element by querying its functional API
-            value = target_type(value)
-    except TypeError:
-        # The issubclass function will fail when checking types and supposed to
-        pass
-    # Since Schemas can have Optional attributes, we assign empty ones the NoneType
-    if is_optional(target_type):
-        if value is None:
-            return None
-        # If the Value is not None we now need to extract the real type: Optional[int] -> int
-        # For Optionals the NoneType is always the last one
-        optional_type = target_type.__args__[0]
-        return extract_value(optional_type, value)
-    # Now we need to take a closer look at additional typing types: List and Dict
-    # They all extend the Collection class and can therefore be filtered
-    try:
-        #print(f'Origin: {target_type.__origin__}')
-        print(f'Extra: {target_type.__extra__}')
-    except:
-        pass
+        # We just try to create the value for every type in the Union
+        for type_ in target_args:
+            if type_ != None:
+                try:
+                    return create_type_value(type_, value)
+                except NoMatchingTypeError:
+                    continue
+        # If no type fits the value, we
+        raise NoMatchingTypeError(target_type, value)
+    # List, Dict
+    elif (
+        target_origin != None
+        and issubclass(target_origin, Collection)
+        and isinstance(value, target_origin)
+    ):
+        # The Class of the Collection: <class 'list'> or <class 'dict'>
+        collection_class = value.__class__
+        if issubclass(collection_class, dict):
+            key_type, item_type = target_type.__args__
+            # Here we create a dictionary with the key, item pairs
+            return collection_class(
+                {
+                    create_type_value(key_type, key): create_type_value(item_type, item)
+                    for key, item in value.items()
+                }
+            )
+        # The second case is the list in which case we create the value for every item
+        item_class = target_args[0] or Any
+        return collection_class(create_type_value(item_class, item) for item in value)
+    # If the type is an Enum, we cast the value
+    elif issubclass(target_type, Enum):
+        return target_type(value)
+    # Dataclass
+    elif is_dataclass(target_type):
+        return create_from_dict(target_type, value)
+    # Everything else: str, int ...
+    elif isinstance(value, target_type):
+        return value
+    # If we got until here, no appropriate match was found
+    raise NoMatchingTypeError(target_type, value)
 
 
+class NoMatchingTypeError(Exception):
+    def __init__(self, type_: Any, value: Any) -> None:
+        self.type_ = type_
+        self.value = value
 
-def extract_generic(type_: Type, defaults: Tuple = ()) -> tuple:
-    try:
-        if hasattr(type_, "_special") and type_._special:
-            print(f'special {hasattr(type_, "_special")}')
-            return defaults
-        print(f"After Special{type_.__args__}")
-        return type_.__args__ or defaults  # type: ignore
-    except AttributeError:
-        return defaults
-
-
-def is_optional(type_: Type) -> bool:
-    return is_union(type_) and type(None) in type_.__args__
-
-def is_union(type_: Type) -> bool:
-    return hasattr(type_, "__origin__") and type_.__origin__ == Union
-
-def is_instance(value: Any, type: Type) -> bool:
-    """Extensive check if value equals the type
-
-    Args:
-        value (Any): Value we want to check
-        type (Type): Type we want to check against
-
-    Returns:
-        bool: if it corresponds to the type
-    """
-    # If the type is Any, everything is valid
-    if type == Any:
-        return True
-    # If any of the types inside the Union corresponds to the value, its valid
-    elif is_union(type):
-        return any(is_instance(value, t) for t in extract_generic(type))
-    # Check if its a Mapping/List/Dict
-    elif is_generic_collection(type):
-        # By checking for the generic collection we know __origin__ exists
-        origin = type.__origin__
-        if not isinstance(value, origin):
-            return False
-        if not extract_generic(type):
-            return True
-        # Since Generic Collections can be multiple types we need check further
-        # Tuples: not needed so far
-        if isinstance(value, tuple):
-            print("I WASN'T PREPARED FOR TUPLES")
-        # Dicts: Typechecking every key and value
-        if isinstance(value, Mapping):
-            key_type, val_type = extract_generic(type, defaults=(Any, Any))
-            for key, val in value.items():
-                if not is_instance(key, key_type) or not is_instance(val, val_type):
-                    return False
-            return True
-        # Lists: We iterate through and check if the items match the sepcified type
-        return all(
-            is_instance(item, extract_generic(type, defaults=(Any,))[0])
-            for item in value
-        )
-
-
-def extract_generic(type_: Type, defaults: Tuple = ()) -> tuple:
-    try:
-        return type_.__args__ or defaults  # type: ignore
-    except AttributeError:
-        return defaults
-
-def is_generic_collection(type_: Type) -> bool:
-    if not hasattr(type_, "__origin__"):
-        return False
-    origin = type_.__origin__
-    try:
-        return bool(origin and issubclass(origin, Collection))
-    except (TypeError, AttributeError):
-        return False
-
-def extract_origin_collection(collection: Type) -> Type:
-    return collection.__origin__
-
-class NonExceptingError(Exception):
-    pass
-
-class MissingValueError(NonExceptingError):
-    def __init__(self, fieldName: str) -> None:
-        super().__init__(fieldName = fieldName)
-    
     def __str__(self) -> str:
-        return f'missing value for field "{self.fieldName}"'
-
+        return f"Type {self.type} didn't match the value {self.value}"
