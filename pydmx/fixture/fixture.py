@@ -5,7 +5,7 @@ Schema Version: 12.2.1
 
 from typing import List, Tuple
 
-from pydmx.fixture.fixtureIndex.fixtureindex import FixtureIndex
+from pydmx.fixtureIndex.fixtureindex import FixtureIndex
 
 
 class Fixture:

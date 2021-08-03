@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Union, NewType
+from typing import Dict, List, Optional, Union
 
 from pydmx.openfixturelibrary.definitionsSchema import (
     Angle,
@@ -77,7 +77,7 @@ class CapabilitySchema:
     # Range of DMX values e.g. 0 to 255 (in most cases) the capability can be applied at
     dmxRange: Optional[MinMax]
     # Capability from the list above
-    type: str
+    # type: CapabilityType
     # Comment with further descriptions
     comment: Optional[str]
     # If the fixture entry needs some love
@@ -93,7 +93,7 @@ class CapabilitySchema:
 #
 @dataclass
 class NoFunction(CapabilitySchema):
-    type: CapabilityType.NOFUNCTION
+    type: CapabilityType = CapabilityType.NOFUNCTION
 
 
 #
@@ -115,11 +115,11 @@ class ShutterEffect(Enum):
 
 @dataclass
 class ShutterStrobe(CapabilitySchema, Speed, Duration):
-    type = CapabilityType.SHUTTERSTROBE.value
     shutterEffect: ShutterEffect
     # Sound COntroll Toggle
     soundControlled: Optional[bool]
     randomTiming: Optional[bool]
+    type: CapabilityType = CapabilityType.SHUTTERSTROBE
 
 
 #
@@ -127,7 +127,7 @@ class ShutterStrobe(CapabilitySchema, Speed, Duration):
 #
 @dataclass
 class StrobeSpeed(CapabilitySchema, Speed):
-    type = "StrobeSpeed"
+    type: CapabilityType = CapabilityType.STROBESPEED
 
 
 #
@@ -135,7 +135,7 @@ class StrobeSpeed(CapabilitySchema, Speed):
 #
 @dataclass
 class StrobeDuration(CapabilitySchema, Duration):
-    type = CapabilityType.STROBEDURATION.value
+    type: CapabilityType = CapabilityType.STROBEDURATION
 
 
 #
@@ -143,7 +143,7 @@ class StrobeDuration(CapabilitySchema, Duration):
 #
 @dataclass
 class Intensity(CapabilitySchema, Brightness):
-    type = CapabilityType.INTENSITY.value
+    type: CapabilityType = CapabilityType.INTENSITY
 
 
 #
@@ -151,8 +151,8 @@ class Intensity(CapabilitySchema, Brightness):
 #
 @dataclass
 class ColorIntensity(CapabilitySchema, Brightness):
-    type = CapabilityType.COLORINTENSITY.value
     color: Color
+    type: CapabilityType = CapabilityType.COLORINTENSITY
 
 
 #
@@ -160,10 +160,10 @@ class ColorIntensity(CapabilitySchema, Brightness):
 #
 @dataclass
 class ColorPreset(CapabilitySchema, ColorTemperatureType):
-    type = CapabilityType.COLORTEMPERATURE.value
     colors: Optional[List[str]]
     colorsStart: Optional[List[str]]
     colorsEnd: Optional[List[str]]
+    type: CapabilityType = CapabilityType.COLORPRESET
 
 
 #
@@ -171,7 +171,7 @@ class ColorPreset(CapabilitySchema, ColorTemperatureType):
 #
 @dataclass
 class ColorTemperature(CapabilitySchema, ColorTemperatureType):
-    type = CapabilityType.COLORTEMPERATURE.value
+    type: CapabilityType = CapabilityType.COLORTEMPERATURE
 
 
 #
@@ -179,7 +179,7 @@ class ColorTemperature(CapabilitySchema, ColorTemperatureType):
 #
 @dataclass
 class Pan(CapabilitySchema, Angle):
-    type = CapabilityType.PAN.value
+    type: CapabilityType = CapabilityType.PAN
 
 
 #
@@ -187,7 +187,7 @@ class Pan(CapabilitySchema, Angle):
 #
 @dataclass
 class PanContinuous(CapabilitySchema, Speed):
-    type = CapabilityType.PANCONTINUOUS.value
+    type: CapabilityType = CapabilityType.PANCONTINUOUS
 
 
 #
@@ -195,7 +195,7 @@ class PanContinuous(CapabilitySchema, Speed):
 #
 @dataclass
 class Tilt(CapabilitySchema, Angle):
-    type = "Tilt"
+    type: CapabilityType = CapabilityType.TILT
 
 
 Capabilities = Union[

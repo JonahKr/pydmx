@@ -2,8 +2,9 @@
 Standard non purpose related schemas.
 """
 from dataclasses import dataclass
-from typing import NamedTuple, Optional
 from enum import Enum
+from typing import NamedTuple, Optional
+
 
 @dataclass
 class Angle:
@@ -15,9 +16,9 @@ class Angle:
     swingAngle: ["closed", "narrow", "wide"]
     """
 
-    angle: str
-    angleStart: str
-    angleEnd: str
+    angle: Optional[str]
+    angleStart: Optional[str]
+    angleEnd: Optional[str]
 
 
 @dataclass
