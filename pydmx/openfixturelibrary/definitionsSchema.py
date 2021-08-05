@@ -88,3 +88,12 @@ class Speed:
     speed: Optional[str]
     speedStart: Optional[str]
     speedEnd: Optional[str]
+
+
+@dataclass
+class SlotNumber:
+    """Non negative numbers"""
+
+    slotNumber: Optional[int]
+    slotNumberStart: Optional[int]
+    slotNumberEnd: Optional[int]

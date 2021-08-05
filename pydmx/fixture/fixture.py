@@ -1,37 +1,16 @@
-"""
-A partial Implementation of the Fixture Schema from: https://github.com/OpenLightingProject/open-fixture-library
-Schema Version: 12.2.1
-"""
-
 from typing import List, Tuple
 
-from pydmx.fixtureIndex.fixtureindex import FixtureIndex
+from pydmx.fixtureIndex.fixtureIndex import FixtureIndex
+from pydmx.openfixturelibrary.fixtureSchema import FixtureSchema
 
-
-class Fixture:
-    __fixtureSchemaVersion = "12.2.1"
+class Fixture(FixtureSchema):
 
     def __init__(self, fixtureName: str, alias: str, *args, **kwargs):
         # TODO enable path import
         # Linking to Fixture Index
         self.__fixtureIndex = FixtureIndex.getInstance()
         # Importing fixture data from Index
-        fixtDict = self.__fixtureIndex.lookupFixture(fixtureName)
-
-        # ~~~~~~~~~~~~~~~~~
-        # Schema Attributes
-        # ~~~~~~~~~~~~~~~~~
-        # IGNORED ATTRIBUTES: meta, comment, links, helpWanted, rdm, physical, matrix, wheels
-        # name: unique in manufacturer
-        self.name: str = fixtDict.name
-        # shortName: unique in OpenFixtureLibrary
-        self.shortName: str = fixtDict.shortName
-        # categories:
-        self.categories: List[FixtureCategories] = fixtDict.categories
-        # matrix
-        # wheels
-        # List of all the available Channels with their settings for the fixture
-        self.availableChannels
+        self.__dict__ = self.__fixtureIndex.lookupFixture(fixtureName).__dict__
 
     def lookupFixtureName(self, fixtureName: str, *args, **kwargs) -> Tuple[str, str]:
         return ("", "")

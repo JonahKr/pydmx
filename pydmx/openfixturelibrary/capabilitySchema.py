@@ -9,6 +9,7 @@ from pydmx.openfixturelibrary.definitionsSchema import (
     ColorTemperatureType,
     Duration,
     MinMax,
+    SlotNumber,
     Speed,
 )
 
@@ -198,6 +199,50 @@ class Tilt(CapabilitySchema, Angle):
     type: CapabilityType = CapabilityType.TILT
 
 
+#
+# Tilt Continuous
+#
+@dataclass
+class TiltContinuous(CapabilitySchema, Speed):
+    type: CapabilityType = CapabilityType.TILTCONTINUOUS
+
+
+#
+# Pan Tilt Speed
+#
+@dataclass
+class PanTiltSpeed(CapabilitySchema, Speed, Duration):
+    type: CapabilityType = CapabilityType.PANTILTSPEED
+
+
+#
+# Wheel Slot
+#
+@dataclass
+class WheelSlot(CapabilitySchema, SlotNumber):
+    wheel: Optional[str]
+    type: CapabilityType = CapabilityType.PANTILTSPEED
+
+
+#
+# Wheel Shake
+#
+class isShaking(Enum):
+    """Enum: wheel or slot"""
+
+    WHEEL = "wheel"
+    SLOT = "slot"
+
+
+@dataclass
+class WheelSlot(CapabilitySchema, SlotNumber):
+    wheel: Optional[str]
+    isShaking: Optional[isShaking]
+    type: CapabilityType = CapabilityType.WHEELSHAKE
+    # TODO: Shake Angle and ShakeSpeed
+
+
+# If anyone has a better idea on how to handle this: PLEASE create an issue
 Capabilities = Union[
     NoFunction,
     ShutterStrobe,
@@ -210,4 +255,7 @@ Capabilities = Union[
     Pan,
     PanContinuous,
     Tilt,
+    TiltContinuous,
+    PanTiltSpeed,
+    WheelSlot,
 ]

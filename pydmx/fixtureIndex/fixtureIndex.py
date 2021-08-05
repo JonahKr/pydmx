@@ -1,10 +1,10 @@
-"""
-"""
-
 import json
 import os
 
 from jsonschema import validate
+
+from pydmx.fixtureIndex.dataclassFactory import create_from_dict
+from pydmx.openfixturelibrary.fixtureSchema import FixtureSchema
 
 dirname = os.path.dirname(__file__)
 
@@ -86,8 +86,19 @@ class FixtureIndex:
         for fixtureId, fixture in fixtures.items():
             self.createCustomFixture(fixtureId, fixture)
 
-    def lookupFixture(self, fixtureId: str):
+    def lookupFixture(self, fixtureId: str) -> Type[FixtureSchema]:
+        """Looks for Fixture Definitions in CustomDirectory aswell as OFL
+
+        Args:
+            fixtureId (str): The id to lookup.
+
+        Returns:
+            Type[FixtureSchema]: Object of FixtureSchema or None
+        """
+        # TODO: FixtureNotFoundError
+        fixture = None
         if self.customfixtures and (fixtureId in self.customfixtures):
-            return self.customfixtures[fixtureId]
+            fixture = self.customfixtures[fixtureId]
         if self.ofl and (fixtureId in self.ofl):
-            return self.ofl[fixtureId]
+            fixture = self.ofl[fixtureId]
+        return create_from_dict(schema=FixtureSchema, data=fixture)

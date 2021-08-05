@@ -10,7 +10,7 @@ Current Version: 12.2.2
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydmx.openfixturelibrary.channelSchema import ChannelSchema
 from pydmx.openfixturelibrary.definitionsSchema import Dimensions, MinMax
@@ -214,9 +214,9 @@ class FixtureSchema:
     # Physical descriptions of the fixture e.g. mass, size, bulb etc...
     physical: Optional[PhysicalSchema]
     # TODO: Matrix Schema
-    matrix: Optional[str]
+    matrix: Optional[Any]
     # TODO: Wheel Schema
-    wheels: Optional[str]
+    wheels: Optional[Any]
     # List of all the available Channels with their settings for the fixture
     availableChannels: Optional[Dict[str, ChannelSchema]]
     # Template Channels
