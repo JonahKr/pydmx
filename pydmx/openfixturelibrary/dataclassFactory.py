@@ -8,18 +8,13 @@ You can find more about dacite here: https://github.com/konradhalas/dacite
 """
 
 from copy import copy
-from dataclasses import (
-    _FIELD,
-    _FIELD_INITVAR,
-    _FIELDS,
-    MISSING,
-    is_dataclass,
-)
+from dataclasses import _FIELD, _FIELD_INITVAR, _FIELDS, MISSING, is_dataclass
 from enum import Enum
 from typing import (
     Any,
     Collection,
     Dict,
+    NamedTuple,
     Optional,
     Type,
     TypeVar,
@@ -97,7 +92,6 @@ def create_type_value(target_type: Type, value: Any) -> Any:
     target_args = ()
     if hasattr(target_type, "__args__"):
         target_args = target_type.__args__
-
     # Type Any means anything can be right
     if target_type == Any:
         return value
@@ -121,7 +115,7 @@ def create_type_value(target_type: Type, value: Any) -> Any:
         and issubclass(target_origin, Collection)
         and isinstance(value, target_origin)
     ):
-        # The Class of the Collection: <class 'list'> or <class 'dict'>
+        # The Class of the Collection: <class 'list'> or <class 'dict'> or tuple
         collection_class = value.__class__
         if issubclass(collection_class, dict):
             key_type, item_type = target_type.__args__
@@ -132,10 +126,22 @@ def create_type_value(target_type: Type, value: Any) -> Any:
                     for key, item in value.items()
                 }
             )
-        # The second case is the list in which case we create the value for every item
+        # Tuples & List
+        # In this case we create the value for every item
         item_class = target_args[0] or Any
         return collection_class(create_type_value(item_class, item) for item in value)
-    # If the type is an Enum, we cast the value
+    # Named Tuple from value as a list
+    elif issubclass(target_type, tuple):
+        tuple_types = target_type
+        tuple_length = len(target_type._fields)
+        value_length = len(value)
+        # If the value has more elements than the Tuple can hold
+        if value_length > tuple_length:
+            raise NoMatchingTypeError(target_type, value)
+        # If not enough values got added for the Named Tuple we fill up with None
+        value.extend(list((None,) * (tuple_length - value_length)))
+        return target_type(*value)
+    # Enum -> we cast the value
     elif issubclass(target_type, Enum):
         return target_type(value)
     # Dataclass
